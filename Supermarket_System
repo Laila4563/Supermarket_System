@@ -1,0 +1,389 @@
+
+//SUPERMARKET PROJECT.
+//A supermarket system project that allows the user to purchase and search for different products.
+
+#include <iostream>
+#include <string>
+#include <stdlib.h>
+#include <fstream>
+
+using namespace std;
+
+const int MAX_NUM_OF_ITEMS = 100;
+int ProductCountInArray = 0;
+int CartCountInArray = 0;
+
+struct product
+{
+    string name;
+    int price = 0;
+    int quantity = 0;
+    int num = 0;
+    long discount = 0;
+};
+
+product shoppingCart[MAX_NUM_OF_ITEMS];
+product superMarketProduct[MAX_NUM_OF_ITEMS];
+
+//1. From the supermarket owner point of view:
+ofstream output;
+void write_product_to_file(int product_index, int appened) {
+
+    ofstream output;
+    if (appened == 1)
+        output.open("Product_list.txt", ios_base::app);
+    else
+        output.open("Product_list.txt");
+
+    output << superMarketProduct[product_index].num << " ";
+    output << superMarketProduct[product_index].name << " ";
+    output << superMarketProduct[product_index].discount << " ";
+    output << superMarketProduct[product_index].price << endl;
+
+    output.close();
+    cout << "Product: " << superMarketProduct[product_index].name << " was written to file successfully!" << endl;
+}
+//a. Preview List of products available
+void preview_list()
+{
+
+    for (int i = 0; i < ProductCountInArray; i++)
+    {
+        cout << "The product number is: " << superMarketProduct[i].num << endl;
+        cout << "The name of the product is: " << superMarketProduct[i].name << endl;
+        cout << "The discount is: " << superMarketProduct[i].discount << endl;
+        cout << "The price is: " << superMarketProduct[i].price << endl;
+        cout << "------------------------------------------------------" << endl;
+    }
+    string exit_character;
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+
+//b. Create a list of products
+void creating_List()
+{
+    string x;
+    for (int i = ProductCountInArray; i < MAX_NUM_OF_ITEMS; i++)
+    {
+        cout << "\nEnter the product number: ";
+        cin >> superMarketProduct[i].num;
+
+        cout << "Enter the name of the product: ";
+        cin >> superMarketProduct[i].name;
+
+        cout << "Enter the discount: ";
+        cin >> superMarketProduct[i].discount;
+
+        cout << "Enter the price: ";
+        cin >> superMarketProduct[i].price;
+
+        ProductCountInArray++;
+
+        write_product_to_file(i, 1);
+
+        cout << "The product has been created \n" << endl;
+        cout << "Do you want to add more (yes or no)? ";
+
+        cin >> x;
+        if (x == "yes")
+        {
+            continue;
+            cout << endl;
+        }
+        else
+            break;
+    }
+}
+
+//c. Edit list of products
+void update_name()
+{
+    string exit_character;
+    // owner will enter string name
+    bool name_found = false;
+    string name_modification, newname;
+
+    cout << " please enter the name of the product " << endl;
+    cin >> name_modification;
+
+    for (int i = 0; i < ProductCountInArray; i++) {
+
+        if (name_modification == superMarketProduct[i].name)
+        {
+            cout << "please enter the new name : " << endl;
+            cin >> superMarketProduct[i].name;
+            name_found = true;
+            write_product_to_file(0, 0);
+            for (int i = 1; i < ProductCountInArray; i++)
+                write_product_to_file(i, 1);
+        }
+    }
+
+    if (name_found != true)
+    {
+        cout << "do you want to add this product to the items list ? ";
+        string ans;
+        cin >> ans;
+        if (ans == "no") {
+            return;
+        }
+        else if (ans == "yes") {
+            creating_List();
+
+        }
+    }
+    cout << "press any key to continue";
+    cin >> exit_character;
+
+}
+
+//d. Edit products prices
+void update_price()
+{
+    cout << "please enter the item name : " << endl;
+    string name, newname;
+    int new_price = 0;
+    cin >> name;
+    int num = 10;
+    for (int i = 0; i < ProductCountInArray; i++)
+    {
+        if (name == superMarketProduct[i].name)
+        {
+            cout << "please enter the new price : " << endl;
+            cin >> superMarketProduct[i].price;
+            write_product_to_file(0, 0);
+            for (int i = 1; i < ProductCountInArray; i++)
+                write_product_to_file(i, 1);
+        }
+    }
+}
+
+//2. From the customer point of view:
+
+    //a. Preview list of products.
+    //b. Add n products to your cart.
+void add_cart()
+{
+    string productName;
+    string exit_character;
+    int count = 0;
+    cout << "Enter product name:";
+    cin >> productName;
+    if (productName.empty())
+        cout << "Product name cannot be empty.";
+    else {
+        for (int i = 0; i < ProductCountInArray; i++)
+        {
+            if (productName == superMarketProduct[i].name)
+            {
+                shoppingCart[CartCountInArray] = superMarketProduct[i];
+                cout << "enter the quantity : ";
+                cin >> shoppingCart[CartCountInArray].quantity;
+                CartCountInArray++;
+
+                cout << "Product added successfully" << endl;
+                break;
+            }
+            count++; 
+        }
+        if (count == ProductCountInArray) {
+            cout << "product not found" << endl;  
+        }
+    }
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+
+//c. Preview products in cart.
+void previewCart()
+{
+    string exit_character;
+    for (int i = 0; i < CartCountInArray; i++)
+    {
+        cout << "the name of product= " << shoppingCart[i].name << endl;
+        cout << "the quantity= " << shoppingCart[i].quantity << endl;
+        cout << "the price of item = " << shoppingCart[i].price << endl;
+        cout << "the amount = " << shoppingCart[i].price * shoppingCart[i].quantity * (1 - (float(shoppingCart[i].discount) / 100.0)) << endl;
+        cout << "------------------------------------------------------" << endl;
+    }
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+
+//d. Search for a product from list of products.
+void search_product()
+{
+    string exit_character;
+    string productName;
+    cout << "Enter product name:";
+    cin >> productName;
+    int itemFound = 0;
+
+    for (int i = 0; i < ProductCountInArray; i++)
+    {
+        if (productName == superMarketProduct[i].name)
+        {
+            cout << "Product Name: " << superMarketProduct[i].name << "\n";
+            cout << "Product Price: " << superMarketProduct[i].price << "\n";
+            cout << "Product discount: " << superMarketProduct[i].discount << "\n";
+            itemFound = 1;
+            break;
+        }
+    }
+    if (itemFound != 1)
+        cout << "Product " << productName << " Not Found!\n";
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+
+//e. Search for a product in the cart.
+void search_cart()
+{
+    string productName;
+    string exit_character;
+
+    cout << "Enter product name:";
+    cin >> productName;
+    int itemFound = 0;
+
+    for (int i = 0; i < CartCountInArray; i++)
+    {
+        if (productName == shoppingCart[i].name)
+        {
+            cout << "quantity: " << shoppingCart[i].quantity << endl;
+            cout << "Product Name: " << shoppingCart[i].name << endl;
+            cout << "Total Price: " << shoppingCart[i].quantity * shoppingCart[i].price << endl;
+            cout << "Product discount: " << shoppingCart[i].discount << endl;
+            itemFound = 1;
+            break;
+        }
+    }
+    if (itemFound != 1) {
+        cout << "Product " << productName << " Not Found in the shopping cart!\n";
+    }
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+//f. Calculate total price for products in the cart.
+void total_price()
+{
+    string exit_character;
+    float totalPrice = 0;
+    for (int i = 0; i < CartCountInArray; i++)
+    {
+        totalPrice = totalPrice + shoppingCart[i].price * shoppingCart[i].quantity * (1 - (float(shoppingCart[i].discount) / 100.0));
+    }
+    cout << "the total of cart equal : " << totalPrice << endl;
+    cout << "press any key to continue";
+    cin >> exit_character;
+}
+
+
+void ReadFileToArray()
+{
+    ifstream input;
+    input.open("product_list.txt");
+    if (!input)
+        return;
+
+    while (!input.eof()) {
+        input >> superMarketProduct[ProductCountInArray].num >>
+            superMarketProduct[ProductCountInArray].name >>
+            superMarketProduct[ProductCountInArray].discount >>
+            superMarketProduct[ProductCountInArray].price;
+        ProductCountInArray++;
+    }
+    ProductCountInArray--;
+    input.close();
+}
+
+void main_menu1()
+{
+
+    while (true)
+    {
+        system("CLS");
+        int num;
+        cout << "\n1.Preview List of products available\n2.Create product list \n3.Edit list of products \n4.Edit list of prices \n5.return to main menu \n" << endl;
+        cout << "choose a number from the above list (1-5): ";
+        cin >> num;
+        if (num == 1)
+        {
+            preview_list();
+        }
+        else if (num == 2)
+        {
+            creating_List();
+        }
+        else if (num == 3)
+        {
+            update_name();
+        }
+        else if (num == 4)
+        {
+            update_price();
+        }
+        else
+            break;
+    }
+}
+
+void main_menu2()
+{
+    while (true) {
+        int num;
+        system("CLS");
+        cout << "\n1.Preview list of product \n2.Add products in cart \n3.Preview products in cart \n4.search for a product in list "
+            << "\n5.Search for a product in cart \n6.calculate total price for products in cart \n7.return to main menu \n";
+        cout << "\nchoose a number from the above list (1-7): ";
+        cin >> num;
+
+        if (num == 1) {
+            preview_list();
+        }
+        else if (num == 2) {
+            add_cart();
+        }
+        else if (num == 3) {
+            previewCart();
+        }
+        else if (num == 4) {
+            search_product();
+        }
+        else if (num == 5) {
+            search_cart();
+        }
+        else if (num == 6) {
+            total_price();
+        }
+        else
+            break;
+    }
+}
+
+
+int main() {
+
+    ReadFileToArray();
+    while (true) {
+        int no;
+        system("CLS");
+        cout << "SUPERMARKET PROJECT \n" << endl;
+        cout << "project made by : \n\nMariam Elbishbeashy \nLaila Amgad \nHabiba Darwish \nSondos Mohamed\nHaya Walid \nMaryam Soubky \n" << endl;
+        cout << "\t1- Adminstrator \n\t2- customers \n\t3- exit " << endl;
+        cout << "Enter from the above list (1-3): ";
+        cin >> no;
+        if (no == 1) {
+            main_menu1();
+        }
+        else if (no == 2) {
+            main_menu2();
+        }
+        else if (no == 3) {
+            break;
+        }
+    }
+    return 0;
+}
+
